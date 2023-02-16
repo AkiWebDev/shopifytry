@@ -1,0 +1,74 @@
+<style>
+  .product-card {
+    box-sizing: border-box;
+    float: left;
+    min-height: 1em;
+    padding-left: 2em;
+    vertical-align: top;
+    width: 25%;
+  }
+
+  .visuallyhidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+    white-space: nowrap;
+  }
+</style>
+
+<h1>{{ collection.title }}</h1>
+
+{%- if collection.description != blank -%}
+  <p>{{ collection.description }}</p>
+{%- endif -%}
+<div class="page-width">   
+  <ul class="custom-product-list grid product-grid grid--2-col-tablet-down grid--4-col-desktop" id="custom-product-grid"></ul> 
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+<script>
+   var settings = {
+  "url": "https://webservice.transpacific-software.com/dev/graphql/",
+  "method": "POST",
+  "timeout": 0,
+  "headers": {
+    "Accept": "application/json",
+    "Authorization": "Basic bmljay5kZW1wc2V5QHdvcmtsb2NrZXIuY29tLmF1OlRyZW5kc3B3MTIz",
+    "Content-Type": "application/json",
+    "Cookie": "csrftoken=fIfwd0juu2uCca7uDqIfKQ1vcW3wqJb3zZmcgFS4s6eQArwB7BkjwKVFUVwmAagY"
+  },
+  "data": JSON.stringify({
+    query: "{ \tdevDiamondData(shapes:\"Round,Oval,Princess,Emerald,Asscher,Cushion,Radiant,Marquise,Pear,Heart\",lab:\"GIA,IGI,HRD,EGL,NA\",color:\"D,E,F,G,H,I,J,K,L,M,N,O-P,Q-R,S-T,U-V,W-X,Y-Z\",clarity:\"FL,IF,VVS1,VVS2,VS1,VS2,SI1,SI2,I1,I2,I3\",cut:\"Excellent,Very Good,Good,Fair,Poor,NA,Ideal\",polish:\"Excellent,Very Good, Good,Fair,Poor\",symmetry:\"Excellent,Very Good,Good,Fair,Poor\",fluoroscence:\"None,Faint,Medium,Strong,Very Strong,Very Slight,Slight\",price:\"10,1000000\",carat:\"0.05,11\",table:\"0,90\", depthPer:\"0,90\",diamondType:\"lab\",colorflag:\"fancy\",orderBy:\"final_price\",sortBy:\"asc\")\r\n{\r\ndataCount\r\ndiamondsReturned\r\npageNo\r\ndiamond{\r\ndiamondId\r\nshape\r\nplusMarkupPrice\r\ncolor\r\nclarity\r\ncaratWeight\r\ncut\r\nsymmetry\r\npolish\r\ndeptPerc\r\ntablePerc\r\nlength\r\nwidth\r\ndepth\r\nratio\r\ngirdleMin\r\ngirdleMax\r\ngirdleCondition\r\nculet\r\nculetCondition\r\nfancyColor\r\nflourIntensity\r\nconvertPrice\r\ncertificateFile\r\nlab\r\nplusMarkupPriceCt\r\nplusMarkupPrice\r\nfinalPrice\r\ncertificateNumber\r\nstockNumber\r\ndiamondImage\r\ndiamondVideo\r\nsellerName\r\ndiamondType\r\ncurrencyCode\r\ncurrencySymbol\r\n}\r\n}\r\n}",
+    variables: {}
+  })
+};
+
+$.ajax(settings).done(function (response) {
+  console.log(response);
+  var html_data = document.getElementById("custom-product-grid");
+  var product_data=''; 
+  $.each(response.data, function(k, v) {
+    $.each(this.diamond, function(key, value) {
+      product_data+='<li class="grid__item"><img src="'+value.diamondImage+'" style="width: 100px;"> <h3>' + value.shape + '</h3><div class="dim-id">'+ value.diamondId
++'</div><p>Color : '+value.fancyColor+'</p></li>';
+    });  
+    $("#custom-product-grid").html(product_data);
+  });
+});
+</script>
+{% schema %}
+  {
+    "name": "Diamond Collection",
+    "settings": []
+  }
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}

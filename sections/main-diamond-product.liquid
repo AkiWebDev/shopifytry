@@ -1,0 +1,44 @@
+{% comment %} <div class="page-width">
+  <div id="diamond-product"></div>
+</div>
+<script>
+var settings = {
+  "url": "https://webservice.transpacific-software.com/dev/graphql/",
+  "method": "POST",
+  "timeout": 0,
+  "headers": {
+    "Accept": "application/json",
+    "Authorization": "Basic bmljay5kZW1wc2V5QHdvcmtsb2NrZXIuY29tLmF1OlRyZW5kc3B3MTIz",
+    "Content-Type": "application/json",
+    "Cookie": "csrftoken=fIfwd0juu2uCca7uDqIfKQ1vcW3wqJb3zZmcgFS4s6eQArwB7BkjwKVFUVwmAagY"
+  },
+  "data": JSON.stringify({
+    query: "{ \r\ndevDiamondById(diamondId:\"135808310\") \r\n{ \r\n\r\ndiamond{ \r\ndiamondId \r\nshape \r\nplusMarkupPrice \r\ncolor \r\nclarity \r\ncaratWeight \r\ncut \r\nsymmetry \r\npolish \r\ndeptPerc \r\ntablePerc \r\nlength \r\nwidth \r\ndepth \r\nratio \r\ngirdleMin \r\ngirdleMax \r\ngirdleCondition \r\nculet \r\nculetCondition \r\nfancyColor \r\nflourIntensity \r\nconvertPrice \r\ncertificateFile \r\nlab \r\nplusMarkupPriceCt \r\nplusMarkupPrice \r\nfinalPrice \r\ncertificateNumber \r\nstockNumber \r\ndiamondImage \r\ndiamondVideo \r\nsellerName \r\ndiamondType \r\ncurrencyCode \r\ncurrencySymbol \r\n\r\n} \t\t\t\t\t\t\t\t\t\t\t\t\t\r\n} \r\n\r\n}\r\n",
+    variables: {}
+  })
+};
+
+$.ajax(settings).done(function (response) {
+ console.log(response);
+  var diamond_data = document.getElementById("diamond-product");
+});
+</script> {% endcomment %}
+{% schema %}
+  {
+    "name": "Diamond Product",
+    "settings": [
+      
+    ],
+    "presets":[
+      {
+        "name":"Dimond Product"
+      }
+    ]
+  }
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}

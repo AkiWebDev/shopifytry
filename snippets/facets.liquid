@@ -1,0 +1,189 @@
+{% comment %}
+    Renders facets (filtering and sorting)
+
+    Accepts:
+    - results: {Object} Collection or Search object
+    - enable_filtering: {Boolean} Show filtering when true
+    - enable_sorting: {Boolean} Show sorting when true
+    - filter_type: {String} Type of filter
+
+    Usage:
+    {% render 'facets', results: collection, enable_filtering: true, enable_sorting: true, filter_type: 'vertical' %}
+{% endcomment %}
+
+{{ 'component-show-more.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign sort_by = results.sort_by | default: results.default_sort_by
+  assign total_active_values = 0
+  if results.url
+    assign results_url = results.url
+  else
+    assign terms = results.terms | escape
+    assign results_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
+  endif
+-%}
+
+<div class="facets-container{% if filter_type == 'drawer' %} facets-container-drawer{% endif %}">
+  {%- if filter_type == 'vertical' or filter_type == 'horizontal' -%}
+    <facet-filters-form class="facets small-hide">
+      <form id="FacetFiltersForm" class="{% if filter_type == 'horizontal' %}facets__form{% else %}facets__form-vertical{% endif %}">
+        
+        {% if enable_filtering %}
+          {% comment %} Heading is the first tabbable element on filter type horizontal {% endcomment %}                 
+        <div class="color-sec">
+            <h3>Select a Color</h3>
+            <ul>                
+              {% if collection.handle == 'test' %}
+              {% for tag in collection.all_tags %}
+              {% if tag contains 'color_' %}                
+              <li class="color-box-{{tag | split: '_' | last}} shade-checkbox" style="background-color: {{ tag | split: '_' | last }}; background-image: url({{ tag | split: '_' | last | append: '_50x50' | append: ".png" | asset_url }})"><input type="checkbox" class="color-checkbox" value="{{tag | downcase | replace: '/', '-'}}" {% if current_tags contains tag %}checked{% endif %}></li>
+              {% endif %}
+              {% endfor %}
+              {% else %}
+              {% for tag in collections[collec_handle].all_tags %}
+              {% if tag contains 'color_' %}
+              <li class="color-box-{{tag | split: '_' | last}} " style="background-color: {{ tag | split: '_' | last }}; background-image: url({{ tag | split: '_' | last | append: '_50x50.' | append: file_extension | asset_url }})"><input type="checkbox" class="color-checkbox" value="{{tag | downcase | replace: '/', '-'}}" {% if current_tags contains tag %}checked{% endif %}></li>
+              {% endif %}
+              {% endfor %}
+              {% endif %}                       
+            </ul>              
+          </div>
+
+          <div class="size-sec">
+            <h3>Select a Size</h3>
+            <ul>                
+              {% if collection.handle == 'test' %}
+              {% for tag in collection.all_tags %}
+              {% if tag contains 'shape_' %}                
+             <li class="shape-box-{{tag | split: '_' | last}}"><input type="checkbox" class="shape-checkbox" value="{{tag | downcase | replace: '/', '-'}}" {% if current_tags contains tag %}checked{% endif %}>                          
+                <label for="shape-label" style="background-image: url({{ tag | downcase | split: '_' | last | replace: ' ', '-' | append: '.' | append: file_extension | asset_url }});">
+                      {{ tag | downcase | split: '_' | last | replace: ' ', '-'  }}
+                </label>
+              </li>
+              {% endif %}
+              {% endfor %}
+              {% endif %}                             
+            </ul>              
+          </div>
+
+        
+          
+        {% endif %}
+      </form>
+    </facet-filters-form>
+  {%- endif -%}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+jQuery(document).ready(function(){
+
+  var collFilters = jQuery('.color-checkbox');
+  collFilters.change(function () {
+    var newTags = [];
+    var tags = '';
+    localStorage.color = '';
+    $('input.color-checkbox').not(this).prop('checked', false);
+    collFilters.each(function () {
+      if ($(this).is(":checked")) {
+        tags = jQuery(this).val();
+        newTags.push(tags.split(' ').join('-'));
+        localStorage.color = jQuery(this).val();
+      }
+    });
+    if (newTags.length) {
+      var query = newTags.join('+');
+      if (localStorage.distressed != ''  || localStorage.distressed != 'undefined') {
+        var distressedval = localStorage.distressed;
+        query = distressedval + '+' + query;      
+      } else {
+        query = query;      
+      }    
+      var filter_url = jQuery('{{ 'tag' | link_to_tag: 'tag' }}').attr('href').replace('tag', query);
+      filter_url = filter_url.replace('+undefined+', '+');
+      filter_url = filter_url.replace('undefined+', '');
+      filter_url = filter_url.replace('undefined','');
+      filter_url = filter_url.replace('/+','/');
+      window.location.href = filter_url;
+    } else {
+      if (localStorage.distressed != '' || localStorage.distressed != 'undefined') {
+        var distressedval = localStorage.distressed;
+        query = distressedval;
+        var filter_url = jQuery('{{ 'tag' | link_to_tag: 'tag' }}').attr('href').replace('tag', query);
+        filter_url = filter_url.replace('+undefined+', '+');
+        filter_url = filter_url.replace('undefined+','');
+        filter_url = filter_url.replace('undefined','');
+        filter_url = filter_url.replace('/+','/');
+        window.location.href = filter_url;
+      } else {
+        window.location.href = '/collections/{{collec_handle}}';
+      }
+    }
+    //alert(fit);    
+  });
+    
+  var distressedFilters = jQuery('.shape-checkbox');
+    distressedFilters.change(function() {
+      var newTags = [];
+      var tags = '';   
+      localStorage.distressed = '';
+      $('input.shape-checkbox').not(this).prop('checked', false);  
+      distressedFilters.each(function() {
+        if($(this).is(":checked")) {
+          tags = jQuery(this).val();        
+          newTags.push(tags.split(' ').join('-'));
+          localStorage.distressed = jQuery(this).val();
+        }
+      });
+      if (newTags.length) {       
+        var query = newTags.join('+');        
+        if (localStorage.color != '' || localStorage.color != 'undefined')
+        {
+          var colorval = localStorage.color;
+          query = colorval+'+'+query;          
+        }else{
+          query = query;           
+        } 
+        var filter_url = jQuery('{{ 'tag' | link_to_tag: 'tag' }}').attr('href').replace('tag', query);
+        filter_url = filter_url.replace('+undefined+','+');
+        filter_url = filter_url.replace('undefined+','');
+        filter_url = filter_url.replace('undefined','');
+        filter_url = filter_url.replace('/+','/');
+        window.location.href = filter_url;
+    }else{
+        if (localStorage.color != '' || localStorage.color != 'undefined')
+        {
+          var colorval = localStorage.color;
+          query = colorval;
+          var filter_url = jQuery('{{ 'tag' | link_to_tag: 'tag' }}').attr('href').replace('tag', query);
+          filter_url = filter_url.replace('+undefined+','+'); 
+          filter_url = filter_url.replace('undefined+','');
+          filter_url = filter_url.replace('undefined','');
+          filter_url = filter_url.replace('/+','/');
+          window.location.href = filter_url;                               
+        }else{      
+          window.location.href = '/collections/{{collec_handle}}';
+      }            
+    }
+      //alert(fit);    
+  }); 
+}); 
+</script>
+<style>
+  .color-sec li {
+    margin: 7px 5px;
+    box-shadow: 1px 1px 1px 1px #00000042;
+    width: 30px;
+}
+.color-sec ul li {
+    position: relative;
+    padding-right: 30px;
+}
+.color-sec ul li input {
+    position: absolute;
+    left: -24px;
+    top: 5px;
+}
+
+</style>
